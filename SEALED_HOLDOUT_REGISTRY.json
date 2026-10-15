@@ -1,0 +1,32 @@
+{
+ "created_utc": "2026-08-15T21:16:10.951337+00:00",
+ "research_cutoff": "2026-06-17T03:03:02Z (last raw trades ts; session 2026-06-17 PARTIAL ~5h)",
+ "holdouts": [
+  {
+   "id": 1,
+   "dates": "HOLDOUT A: 2026-06-18 .. 2026-08-14 (partial Holdout-1 window, opened early by user decision)",
+   "schema": "GLBX.MDP3 trades, parent NQ.FUT (full complex, spreads excluded at processing)",
+   "status": "OPENED \u2014 VALIDATION COMPLETE: FAIL",
+   "opened": "2026-08-15T21:59:22.177334+00:00",
+   "open_code_hash": "4e2eb7c41a1264981547fb34e983b7177662510aef5dcf823d322c4e04b3b869",
+   "operator": "Phase 17B",
+   "purpose": "one-time frozen Balanced validation (pre-live)",
+   "files": "GLBX-20260815-69WTYRKTDB: 52 daily trades.dbn.zst (manifest sha256 all verified) + metadata/condition/manifest",
+   "result": "Balanced N=140 WR 27.9% expR -0.133R PF 0.83 tot -18.6R; mechanical core N=167 -0.103R PF 0.87; 0th pct of dev windows; prop replay 0 payouts 2 deaths. Per no-retune rule HOLDOUT A is now development/diagnostic data for any modified strategy.",
+   "result_recorded": "2026-08-15T22:23:43.636471+00:00"
+  },
+  {
+   "id": 2,
+   "dates": "2026-12-18 .. +3-6mo (future; not yet available)",
+   "schema": "same",
+   "status": "SEALED-PENDING-ACQUISITION",
+   "opened": null,
+   "open_code_hash": null
+  }
+ ],
+ "rules": [
+  "No evaluation, charting, scoring, or summary statistics until a registered opening.",
+  "Once HOLDOUT 1 is opened, Balanced may not be modified and re-validated on it; any post-open modification demotes HOLDOUT 1 to development data and only HOLDOUT 2 / later data may validate.",
+  "Sealed files never enter /Volumes/T9/nq_levels/bars_1s or daily (glob-ingested by builders)."
+ ]
+}

@@ -1,0 +1,56 @@
+# Data locations.
+#
+# RAW roots are READ-ONLY. Nothing in this project may write, move, rename or
+# delete anything beneath a raw root; io/raw.py enforces this at import time by
+# refusing to hand out write handles for paths under these prefixes.
+#
+# DERIVED lives on the T9 SSD, NOT on the internal disk: the Mac has ~32 GB
+# free, the SSD has ~662 GB. Derived is deliberately outside `nq data/` so a
+# recursive listing of the raw tree never mixes generated files with source.
+
+raw:
+  nq_trades:
+    path: "/Volumes/T9/nq data/raw/trades"
+    pattern: "*.parquet"
+    kind: databento_trades          # rtype 0, action 'T' only
+    ts_col: ts_event                # exchange event time, tz-aware UTC ns
+  nq_mbp1:
+    path: "/Volumes/T9/nq data/raw/mbp1"
+    pattern: "*.parquet"
+    kind: databento_mbp1            # top-of-book + interleaved trades
+    ts_col: ts_event
+    # Files overlap slightly at half-year seams; see canonical_windows below.
+    coverage_end: "2025-06-30"      # no MBP-1 after this date
+
+# Half-open [start, end) UTC windows that make the MBP-1 file set a strict
+# partition of the timeline. Measured from row-group statistics + a seam
+# duplicate probe (2026-08-14): the 2023_H2 / 2024_H1 seam contains genuinely
+# duplicated records, so reads must be windowed rather than simply unioned.
+# A file's rows outside its window are always present in the neighbour file.
+mbp1_canonical_windows:
+  "2021_H1": ["2020-12-01", "2021-07-01"]
+  "2021_H2": ["2021-07-01", "2022-01-01"]
+  "2022_H1": ["2022-01-01", "2022-07-01"]
+  "2022_H2": ["2022-07-01", "2023-01-01"]
+  "2023_H1": ["2023-01-01", "2023-07-01"]
+  "2023_H2": ["2023-07-01", "2024-01-01"]
+  "2024_H1": ["2024-01-01", "2024-07-01"]
+  "2024_H2": ["2024-07-01", "2025-01-01"]
+  "2025_H1": ["2025-01-01", "2025-07-01"]
+
+derived:
+  root: "/Volumes/T9/nq_levels"
+  bars_1s: "bars_1s"          # L1: 1-second OHLCV+flow, partitioned by session
+  profiles: "profiles"        # L1: volume-at-price, partitioned by session
+  daily: "daily"              # L2: one row per session — references + regimes
+  candidates: "candidates"    # L3: candidate zones known at the decision time
+  labels: "labels"            # L4: touch + reaction outcomes
+  micro: "micro"              # L5: MBP-1 reductions (touch-time confirmation)
+  checkpoints: "checkpoints"
+
+outputs_dir: "outputs"        # reports, audits, experiment artifacts (in-repo)
+
+# Cross-project reference data (read-only, used only for validation, never as
+# a source of truth). Built by the earlier ~/Desktop/NQ (TOPSTEP) program.
+reference:
+  tslab_nq_bars_1m: "/Users/aryan/Desktop/NQ (TOPSTEP)/outputs/nq_bars_full.parquet"

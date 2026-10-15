@@ -1,0 +1,82 @@
+# Research contract: session windows, the decision instant, and the
+# chronological split. Everything here is trader-facing and therefore defined
+# in America/Los_Angeles (PT). The exchange clock (CME trade-date roll,
+# holidays, halts) stays in America/Chicago and lives in cme_calendar.yaml.
+#
+# PT and CT observe identical US DST transitions, so 06:30 PT == 08:30 CT on
+# every trade date. Both are resolved through zoneinfo; no fixed UTC offset is
+# ever hard-coded.
+
+clock:
+  trader_tz: "America/Los_Angeles"
+  exchange_tz: "America/Chicago"
+
+windows:
+  # The instant a live morning run would produce its zones. NOTHING at or after
+  # this stamp may influence a candidate zone or any pre-open feature.
+  decision_pt: "06:25"
+
+  # The window the system is judged on: first 2.5 h of NY cash RTH.
+  target_start_pt: "06:30"
+  target_end_pt: "09:00"
+
+  # Full NQ RTH, for context features and for "did it come later" diagnostics.
+  rth_start_pt: "06:30"
+  rth_end_pt: "13:00"
+
+  # Named pre-open segments, all strictly before decision_pt. Boundaries are PT
+  # wall-clock on the trade date unless marked prev_day.
+  segments:
+    globex:    { start_pt: "15:00", end_pt: "06:30", prev_day_start: true }  # 17:00-08:30 CT
+    asia:      { start_pt: "15:00", end_pt: "00:00", prev_day_start: true }
+    london:    { start_pt: "00:00", end_pt: "05:00" }
+    premarket: { start_pt: "05:00", end_pt: "06:30" }
+    # Prior trade date's segments are derived by shifting one session back.
+
+  # Sub-windows used for touch labels inside the target window.
+  touch_horizons_min: [15, 30, 60, 90, 150]
+
+# Chronological split. Never shuffled. The holdout is not read by any tuning
+# code path; eval/splits.py raises if a run requests holdout without an
+# explicit pre-registration token.
+splits:
+  train:      ["2021-01-05", "2024-06-30"]   # incl. 2021-22 regime-robustness era
+  validation: ["2024-07-01", "2025-12-31"]
+  holdout:    ["2026-01-01", "2026-06-17"]   # SEALED. trades-only (no MBP-1)
+  # Sub-split used for robustness reporting rather than selection.
+  early_regime: ["2021-01-05", "2022-12-31"]
+  # MBP-1 exists only through 2025-06-30. Any model using micro features is
+  # evaluated on a strictly shorter span and must say so.
+  mbp1_end: "2025-06-30"
+
+zones:
+  # Zone half-width is a research object, not a constant. These are the
+  # families the width study compares; the default is only a placeholder used
+  # by smoke tests until the study lands.
+  default_halfwidth_ticks: 6        # 1.5 index points
+  width_families:
+    - fixed_ticks
+    - atr_fraction               # k * ATR(prior N sessions, RTH)
+    - overnight_range_fraction
+    - realized_vol_scaled        # k * sigma_1s * sqrt(horizon)
+    - empirical_penetration      # quantile of historical overshoot at this level type
+    - profile_node_width         # width of the volume node itself
+
+instrument:
+  symbol_root: "NQ"
+  tick_size: 0.25
+  point_value: 20.0
+  spread_marker: "-"             # symbols containing '-' are calendar spreads
+
+build:
+  # A quarterly outright is materialised for a session when it holds at least
+  # this share of that session's outright volume. Normally 1 symbol; 2-3 across
+  # a roll, which is exactly when prior-day levels need the incoming scale.
+  min_symbol_volume_share: 0.005
+  bar_seconds: 1
+  # Causal bad-print filter: reject a price more than max_jump_pct away from
+  # the rolling median of STRICTLY PRIOR prints.
+  trade_filter:
+    min_size: 1
+    median_window: 50
+    max_jump_pct: 0.005

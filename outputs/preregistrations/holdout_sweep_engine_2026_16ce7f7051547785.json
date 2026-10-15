@@ -1,0 +1,45 @@
+{
+  "name": "holdout_sweep_engine_2026",
+  "hypothesis": "The frozen P3-207 variant-A engine's top-K selections beat distance-matched same-morning controls on sweep-aware meaningful reaction (y_any = direct rejection OR valid sweep+reclaim) on the sealed 2026 holdout, as they did on validation (P3-208 stage 3).",
+  "rule": "Engine: score = E1 P(touch|near-edge distance, side, vol) x walk-forward P(clean|touch) logistic; E1 four-feature baseline (log_rv_on, log_prior_rv, log_on_range, log_atr14) fit on train context only, frozen; p_clean features dist_atr, dist_atr^2, above, above*dist, atr_pctile, on_range_rel_atr, |gap_atr_prior|, log1p(macro_volx_pre), loc_in_pdr_prior clipped [-2,3]; LogisticRegression C=1.0 + StandardScaler, monthly-expanding refit on all touched rows strictly before each month (train+validation+ earlier holdout months). Grid zones half-width 6 ticks; selection top-K by score, distance window 0.15-1.0 ATR, min separation 24 ticks. Taxonomy: R=15 pts from near edge; d0=4t; penetration by range; reclaim = closes past NEAR edge held 60 s; post-reclaim reaction within 1800 s anchored at near edge; resolved >= 1800 s forward; cells strict D=24t/T=900s, mid D=0.05*ATR/T=900s, primary D=0.10*ATR/T=1800s. Evaluation: eval/topk.evaluate, matched same-morning controls (same distance decile band of the full frame, same side, >=24t from every pick), n_draws=8, n_boot=500, n_bands=10, seed=23; paired session-clustered bootstrap.",
+  "params": {
+    "R_pts": 15,
+    "d0_ticks": 4,
+    "reclaim_level": "near_edge",
+    "reclaim_hold_s": 60,
+    "cells": {
+      "strict": [
+        24,
+        900
+      ],
+      "mid": [
+        "0.05*ATR",
+        900
+      ],
+      "primary": [
+        "0.10*ATR",
+        1800
+      ]
+    },
+    "half_width_ticks": 6,
+    "dist_window_atr": [
+      0.15,
+      1.0
+    ],
+    "min_sep_ticks": 24,
+    "seed": 23,
+    "n_boot": 500,
+    "n_draws": 8,
+    "holdout_span": [
+      "2026-01-01",
+      "2026-06-17"
+    ],
+    "embargo_sessions": 5
+  },
+  "gates": {
+    "PASS": "strict-cell cond (y_any|touch) model-minus-matched > 0 at K=2 AND K=4; bootstrap 95% CI lo > 0 for at least one of K=2/K=4; mid-cell cond contrast at K=2 has the same (positive) sign. Anything else is FAIL."
+  },
+  "note": "One shot, authorized by Aryan 2026-08-15. 2026 is spent after this test regardless of outcome. No post-holdout tuning of any kind.",
+  "registered_utc": "2026-08-15T07:57:34.771571+00:00",
+  "token": "16ce7f7051547785"
+}

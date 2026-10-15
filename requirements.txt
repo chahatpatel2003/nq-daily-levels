@@ -1,0 +1,7 @@
+pyarrow>=15
+pandas>=2.1
+numpy>=1.26
+PyYAML>=6
+pytest>=8
+scipy>=1.11
+scikit-learn>=1.4

@@ -1,0 +1,294 @@
+# Session clock. All rules are defined in America/Chicago (CT) because CME and
+# Topstep define them in CT; data timestamps are UTC and get converted.
+sessions:
+  timezone: "America/Chicago"
+
+  # CME Globex daily cycle (both CME equity index and COMEX metals):
+  # open 17:00 CT previous calendar day, close 16:00 CT, maintenance 16:00-17:00.
+  globex_open_ct: "17:00"
+  globex_close_ct: "16:00"
+
+  # A timestamp at/after 17:00 CT belongs to the NEXT calendar day's session.
+  # Sunday 17:00 CT open => Monday's trade date.
+
+  # Topstep intraday constraint: flat by 15:10 CT, no positions until reopen.
+  # (Topstep risk managers begin flattening 15:08 CT; NQ also has the CME
+  # equity 15:15-15:30 CT daily pause — both after our cutoff, so irrelevant.)
+  eod_flatten_ct: "15:10"
+  reopen_ct: "17:00"
+
+  # Default research window (entries). Conservative: RTH-ish, well before the
+  # flatten cutoff. Strategies may use narrower windows; never wider than
+  # allowed_entry below without changing this config.
+  allowed_entry:
+    start_ct: "07:30"
+    end_ct: "14:30"
+
+  # Per-instrument reference RTH (for feature construction / regime tagging,
+  # not for rule enforcement):
+  rth:
+    NQ: { start_ct: "08:30", end_ct: "15:00" }
+    GC: { start_ct: "07:20", end_ct: "12:30" }   # COMEX floor hours reference
+
+  # ------------------------------------------------------------------------
+  # CME holiday calendar 2016-2026 (NQ + GC), populated 2026-07-03.
+  #
+  # SOURCES:
+  #  - 2016-2025: empirically measured from CME Globex's actual recorded
+  #    behavior in the local Databento CME data: GC 1-min bars (every weekday
+  #    2016-2025 classified: zero day-session bars = full close; last-bar
+  #    time = halt) and NQ trade prints (2021-2026H1 spot checks).
+  #  - 2026 H1: verified against NQ trades (MLK/Presidents/Memorial halts at
+  #    11:59:5x CT; 2026-01-01 fully closed; 2026-04-03 Good Friday traded a
+  #    jobs-report mini session ending 08:14:58 CT).
+  #  - 2026 H2 (Jul 3, Labor, Thanksgiving+Friday, Dec 24/25): derived from
+  #    the stable CME holiday schedule pattern; VERIFY against the official
+  #    CME notice (cmegroup.com holiday calendar) when published. A live
+  #    fetch of cmegroup.com was attempted 2026-07-03 and blocked (JS/bot
+  #    protection), so exchange-recorded data is the source of record here.
+  #
+  # SEMANTICS:
+  #  - holidays: NOT valid trade dates. CME clearing is closed; all Globex
+  #    activity from the prior 17:00 CT open through the holiday halt books
+  #    to the NEXT trade date. Full-close entries have no early_closes row;
+  #    halt entries do.
+  #  - early_closes: calendar date -> Globex halt time (CT). Dates present
+  #    here but NOT in holidays (day after Thanksgiving, Christmas Eve,
+  #    July 3) are normal trade dates with a shortened session.
+  #  - Halt times are the CONSERVATIVE MINIMUM across NQ and GC where they
+  #    diverge: equity index halts 12:00 CT on halt holidays in all years;
+  #    COMEX metals halted 12:00 CT through 2021 but 13:30 CT from 2022.
+  #    Equity half days halt 12:15 CT; metals 12:45 CT (13:45 from 2024).
+  #    Using the earlier time blocks up to ~90min of thin holiday GC trading
+  #    — deliberate (Topstep strategies should not trade holiday sessions).
+  #  - July 3 half days are equity-only (GC trades a full day); included
+  #    globally as a conservative simplification.
+  #  - Known non-events confirmed by data: no closure Fri 2021-12-31 (New
+  #    Year 2022 fell on Saturday); COMEX metals traded normally on the
+  #    2018-12-05 Bush mourning day (NYSE closed); Columbus/Veterans Day are
+  #    normal CME sessions. gc_2020.parquet has DATA GAPS on 2020-02-28 and
+  #    2020-06-30 (normal trading days — do not mistake them for closures).
+  # ------------------------------------------------------------------------
+  holidays:
+    # ---- 2016 ----
+    - 2016-01-01   # New Year's Day (full close)
+    - 2016-01-18   # MLK Day (halt; books to next trade date)
+    - 2016-02-15   # Presidents' Day (halt; books to next trade date)
+    - 2016-03-25   # Good Friday (full close)
+    - 2016-05-30   # Memorial Day (halt; books to next trade date)
+    - 2016-07-04   # Independence Day (halt; books to next trade date)
+    - 2016-09-05   # Labor Day (halt; books to next trade date)
+    - 2016-11-24   # Thanksgiving (halt; books to next trade date)
+    - 2016-12-26   # Christmas (observed) (full close)
+    # ---- 2017 ----
+    - 2017-01-02   # New Year's Day (observed) (full close)
+    - 2017-01-16   # MLK Day (halt; books to next trade date)
+    - 2017-02-20   # Presidents' Day (halt; books to next trade date)
+    - 2017-04-14   # Good Friday (full close)
+    - 2017-05-29   # Memorial Day (halt; books to next trade date)
+    - 2017-07-04   # Independence Day (halt; books to next trade date)
+    - 2017-09-04   # Labor Day (halt; books to next trade date)
+    - 2017-11-23   # Thanksgiving (halt; books to next trade date)
+    - 2017-12-25   # Christmas (full close)
+    # ---- 2018 ----
+    - 2018-01-01   # New Year's Day (full close)
+    - 2018-01-15   # MLK Day (halt; books to next trade date)
+    - 2018-02-19   # Presidents' Day (halt; books to next trade date)
+    - 2018-03-30   # Good Friday (full close)
+    - 2018-05-28   # Memorial Day (halt; books to next trade date)
+    - 2018-07-04   # Independence Day (halt; books to next trade date)
+    - 2018-09-03   # Labor Day (halt; books to next trade date)
+    - 2018-11-22   # Thanksgiving (halt; books to next trade date)
+    - 2018-12-25   # Christmas (full close)
+    # ---- 2019 ----
+    - 2019-01-01   # New Year's Day (full close)
+    - 2019-01-21   # MLK Day (halt; books to next trade date)
+    - 2019-02-18   # Presidents' Day (halt; books to next trade date)
+    - 2019-04-19   # Good Friday (full close)
+    - 2019-05-27   # Memorial Day (halt; books to next trade date)
+    - 2019-07-04   # Independence Day (halt; books to next trade date)
+    - 2019-09-02   # Labor Day (halt; books to next trade date)
+    - 2019-11-28   # Thanksgiving (halt; books to next trade date)
+    - 2019-12-25   # Christmas (full close)
+    # ---- 2020 ----
+    - 2020-01-01   # New Year's Day (full close)
+    - 2020-01-20   # MLK Day (halt; books to next trade date)
+    - 2020-02-17   # Presidents' Day (halt; books to next trade date)
+    - 2020-04-10   # Good Friday (full close)
+    - 2020-05-25   # Memorial Day (halt; books to next trade date)
+    - 2020-07-03   # Independence Day (observed) (halt; books to next trade date)
+    - 2020-09-07   # Labor Day (halt; books to next trade date)
+    - 2020-11-26   # Thanksgiving (halt; books to next trade date)
+    - 2020-12-25   # Christmas (full close)
+    # ---- 2021 ----
+    - 2021-01-01   # New Year's Day (full close)
+    - 2021-01-18   # MLK Day (halt; books to next trade date)
+    - 2021-02-15   # Presidents' Day (halt; books to next trade date)
+    - 2021-04-02   # Good Friday (full close)
+    - 2021-05-31   # Memorial Day (halt; books to next trade date)
+    - 2021-07-05   # Independence Day (observed) (halt; books to next trade date)
+    - 2021-09-06   # Labor Day (halt; books to next trade date)
+    - 2021-11-25   # Thanksgiving (halt; books to next trade date)
+    - 2021-12-24   # Christmas (observed) (full close)
+    # ---- 2022 ----
+    - 2022-01-17   # MLK Day (halt; books to next trade date)
+    - 2022-02-21   # Presidents' Day (halt; books to next trade date)
+    - 2022-04-15   # Good Friday (full close)
+    - 2022-05-30   # Memorial Day (halt; books to next trade date)
+    - 2022-06-20   # Juneteenth (observed) (halt; books to next trade date)
+    - 2022-07-04   # Independence Day (halt; books to next trade date)
+    - 2022-09-05   # Labor Day (halt; books to next trade date)
+    - 2022-11-24   # Thanksgiving (halt; books to next trade date)
+    - 2022-12-26   # Christmas (observed) (full close)
+    # ---- 2023 ----
+    - 2023-01-02   # New Year's Day (observed) (full close)
+    - 2023-01-16   # MLK Day (halt; books to next trade date)
+    - 2023-02-20   # Presidents' Day (halt; books to next trade date)
+    - 2023-04-07   # Good Friday (full close)
+    - 2023-05-29   # Memorial Day (halt; books to next trade date)
+    - 2023-06-19   # Juneteenth (halt; books to next trade date)
+    - 2023-07-04   # Independence Day (halt; books to next trade date)
+    - 2023-09-04   # Labor Day (halt; books to next trade date)
+    - 2023-11-23   # Thanksgiving (halt; books to next trade date)
+    - 2023-12-25   # Christmas (full close)
+    # ---- 2024 ----
+    - 2024-01-01   # New Year's Day (full close)
+    - 2024-01-15   # MLK Day (halt; books to next trade date)
+    - 2024-02-19   # Presidents' Day (halt; books to next trade date)
+    - 2024-03-29   # Good Friday (full close)
+    - 2024-05-27   # Memorial Day (halt; books to next trade date)
+    - 2024-06-19   # Juneteenth (halt; books to next trade date)
+    - 2024-07-04   # Independence Day (halt; books to next trade date)
+    - 2024-09-02   # Labor Day (halt; books to next trade date)
+    - 2024-11-28   # Thanksgiving (halt; books to next trade date)
+    - 2024-12-25   # Christmas (full close)
+    # ---- 2025 ----
+    - 2025-01-01   # New Year's Day (full close)
+    - 2025-01-20   # MLK Day (halt; books to next trade date)
+    - 2025-02-17   # Presidents' Day (halt; books to next trade date)
+    - 2025-04-18   # Good Friday (full close)
+    - 2025-05-26   # Memorial Day (halt; books to next trade date)
+    - 2025-06-19   # Juneteenth (halt; books to next trade date)
+    - 2025-07-04   # Independence Day (halt; books to next trade date)
+    - 2025-09-01   # Labor Day (halt; books to next trade date)
+    - 2025-11-27   # Thanksgiving (halt; books to next trade date)
+    - 2025-12-25   # Christmas (full close)
+    # ---- 2026 ----
+    - 2026-01-01   # New Year's Day (full close; verified in NQ trades)
+    - 2026-01-19   # MLK Day (halt; verified in NQ trades)
+    - 2026-02-16   # Presidents' Day (halt; verified in NQ trades)
+    - 2026-04-03   # Good Friday jobs-report mini session (halt 08:15; verified in NQ trades)
+    - 2026-05-25   # Memorial Day (halt; verified in NQ trades)
+    - 2026-06-19   # Juneteenth (pattern-derived; beyond data range)
+    - 2026-07-03   # Independence Day (observed; pattern per 2020 precedent)
+    - 2026-09-07   # Labor Day (pattern-derived; VERIFY vs CME notice)
+    - 2026-11-26   # Thanksgiving (pattern-derived; VERIFY vs CME notice)
+    - 2026-12-25   # Christmas (pattern-derived; VERIFY vs CME notice)
+
+  early_closes:
+    # ---- 2016 ----
+    "2016-01-18": "12:00"   # MLK Day
+    "2016-02-15": "12:00"   # Presidents' Day
+    "2016-05-30": "12:00"   # Memorial Day
+    "2016-07-04": "12:00"   # Independence Day
+    "2016-09-05": "12:00"   # Labor Day
+    "2016-11-24": "12:00"   # Thanksgiving
+    "2016-11-25": "12:15"   # day after Thanksgiving (half day, trade date)
+    # ---- 2017 ----
+    "2017-01-16": "12:00"   # MLK Day
+    "2017-02-20": "12:00"   # Presidents' Day
+    "2017-05-29": "12:00"   # Memorial Day
+    "2017-07-03": "12:15"   # day before July 4 (equity half day, trade date)
+    "2017-07-04": "12:00"   # Independence Day
+    "2017-09-04": "12:00"   # Labor Day
+    "2017-11-23": "12:00"   # Thanksgiving
+    "2017-11-24": "12:15"   # day after Thanksgiving (half day, trade date)
+    # ---- 2018 ----
+    "2018-01-15": "12:00"   # MLK Day
+    "2018-02-19": "12:00"   # Presidents' Day
+    "2018-05-28": "12:00"   # Memorial Day
+    "2018-07-03": "12:15"   # day before July 4 (equity half day, trade date)
+    "2018-07-04": "12:00"   # Independence Day
+    "2018-09-03": "12:00"   # Labor Day
+    "2018-11-22": "12:00"   # Thanksgiving
+    "2018-11-23": "12:15"   # day after Thanksgiving (half day, trade date)
+    "2018-12-24": "12:15"   # Christmas Eve (half day, trade date)
+    # ---- 2019 ----
+    "2019-01-21": "12:00"   # MLK Day
+    "2019-02-18": "12:00"   # Presidents' Day
+    "2019-05-27": "12:00"   # Memorial Day
+    "2019-07-03": "12:15"   # day before July 4 (equity half day, trade date)
+    "2019-07-04": "12:00"   # Independence Day
+    "2019-09-02": "12:00"   # Labor Day
+    "2019-11-28": "12:00"   # Thanksgiving
+    "2019-11-29": "12:15"   # day after Thanksgiving (half day, trade date)
+    "2019-12-24": "12:15"   # Christmas Eve (half day, trade date)
+    # ---- 2020 ----
+    "2020-01-20": "12:00"   # MLK Day
+    "2020-02-17": "12:00"   # Presidents' Day
+    "2020-05-25": "12:00"   # Memorial Day
+    "2020-07-03": "12:00"   # Independence Day (observed)
+    "2020-09-07": "12:00"   # Labor Day
+    "2020-11-26": "12:00"   # Thanksgiving
+    "2020-11-27": "12:15"   # day after Thanksgiving (half day, trade date)
+    "2020-12-24": "12:15"   # Christmas Eve (half day, trade date)
+    # ---- 2021 ----
+    "2021-01-18": "12:00"   # MLK Day
+    "2021-02-15": "12:00"   # Presidents' Day
+    "2021-05-31": "12:00"   # Memorial Day
+    "2021-07-05": "12:00"   # Independence Day (observed)
+    "2021-09-06": "12:00"   # Labor Day
+    "2021-11-25": "12:00"   # Thanksgiving
+    "2021-11-26": "12:15"   # day after Thanksgiving (half day, trade date)
+    # ---- 2022 ----
+    "2022-01-17": "12:00"   # MLK Day (equity 12:00; metals 13:30 from 2022 — min)
+    "2022-02-21": "12:00"   # Presidents' Day
+    "2022-05-30": "12:00"   # Memorial Day
+    "2022-06-20": "12:00"   # Juneteenth (observed)
+    "2022-07-04": "12:00"   # Independence Day
+    "2022-09-05": "12:00"   # Labor Day
+    "2022-11-24": "12:00"   # Thanksgiving
+    "2022-11-25": "12:15"   # day after Thanksgiving (half day, trade date)
+    # ---- 2023 ----
+    "2023-01-16": "12:00"   # MLK Day
+    "2023-02-20": "12:00"   # Presidents' Day
+    "2023-05-29": "12:00"   # Memorial Day
+    "2023-06-19": "12:00"   # Juneteenth
+    "2023-07-03": "12:15"   # day before July 4 (equity half day, trade date)
+    "2023-07-04": "12:00"   # Independence Day
+    "2023-09-04": "12:00"   # Labor Day
+    "2023-11-23": "12:00"   # Thanksgiving
+    "2023-11-24": "12:15"   # day after Thanksgiving (half day, trade date)
+    # ---- 2024 ----
+    "2024-01-15": "12:00"   # MLK Day
+    "2024-02-19": "12:00"   # Presidents' Day
+    "2024-05-27": "12:00"   # Memorial Day
+    "2024-06-19": "12:00"   # Juneteenth
+    "2024-07-03": "12:15"   # day before July 4 (equity half day, trade date)
+    "2024-07-04": "12:00"   # Independence Day
+    "2024-09-02": "12:00"   # Labor Day
+    "2024-11-28": "12:00"   # Thanksgiving (NQ 12:00; GC traded to 13:00)
+    "2024-11-29": "12:15"   # day after Thanksgiving (NQ 12:15; GC 13:45 — min)
+    "2024-12-24": "12:15"   # Christmas Eve (NQ 12:15; GC 12:45 — min)
+    # ---- 2025 ----
+    "2025-01-20": "12:00"   # MLK Day
+    "2025-02-17": "12:00"   # Presidents' Day
+    "2025-05-26": "12:00"   # Memorial Day
+    "2025-06-19": "12:00"   # Juneteenth
+    "2025-07-03": "12:15"   # day before July 4 (equity half day, trade date)
+    "2025-07-04": "12:00"   # Independence Day
+    "2025-09-01": "12:00"   # Labor Day
+    "2025-11-27": "12:00"   # Thanksgiving
+    "2025-11-28": "12:15"   # day after Thanksgiving (half day, trade date)
+    "2025-12-24": "12:15"   # Christmas Eve (half day, trade date)
+    # ---- 2026 ----
+    "2026-01-19": "12:00"   # MLK Day (verified in NQ trades)
+    "2026-02-16": "12:00"   # Presidents' Day (verified in NQ trades)
+    "2026-04-03": "08:15"   # Good Friday jobs-report mini session (verified)
+    "2026-05-25": "12:00"   # Memorial Day (verified in NQ trades)
+    "2026-06-19": "12:00"   # Juneteenth (pattern-derived)
+    "2026-07-03": "12:00"   # Independence Day (observed; pattern)
+    "2026-09-07": "12:00"   # Labor Day (pattern; VERIFY vs CME notice)
+    "2026-11-26": "12:00"   # Thanksgiving (pattern; VERIFY vs CME notice)
+    "2026-11-27": "12:15"   # day after Thanksgiving (pattern; VERIFY)
+    "2026-12-24": "12:15"   # Christmas Eve (pattern; VERIFY)

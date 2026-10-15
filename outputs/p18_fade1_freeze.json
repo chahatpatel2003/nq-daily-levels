@@ -1,0 +1,9 @@
+{
+ "definition": {
+  "name": "FADE-1",
+  "rule": "frozen resistance zone (P14 methodology unchanged); FIRST touch only (tap_no==1); fill = limit at near edge, requires >=2 ticks trade-through; stop = edge+20.0 pts; target = edge-30.0 pts; cost 1.0pt RT; one trade per zone-session; one-open-trade; all sessions; no R4, no fire/mono filters, no model",
+  "provenance": "P18 Stage B nested walk-forward; registered hypothesis H1; selection criterion max worst-fold on coarse grid; plateau verified; shadow-control superior in 10/10 blocks",
+  "caveat": "ZERO external validation; HOLDOUT A included in development; outcome model grid-approximated (production ledger pass required before any live consideration)"
+ },
+ "sha256": "8b969a0767282664d77c6a8b3f66f2066380cedbd563c58c0af8ac5a12901084"
+}

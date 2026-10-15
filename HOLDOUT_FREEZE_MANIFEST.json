@@ -1,0 +1,48 @@
+{
+ "phase": "17A",
+ "created_utc": "2026-08-15T21:16:10.951337+00:00",
+ "research_cutoff": "2026-06-17T03:03:02Z (last raw trades ts; session 2026-06-17 PARTIAL ~5h)",
+ "git": "not a git repository (recorded)",
+ "strategy": {
+  "name": "BALANCED (E_hybrid)",
+  "rule": "frozen resistance zone; tap<=3; R4v10 (10pts<near edge within 60s of touch); fire_s<=24s; mono>=0.27; HGB walk-forward score >= frozen top-70% train-quantile; decide at fire bar; market fill next second; stop 12.5; target 30; one open trade; base cost 1.0pt RT"
+ },
+ "prop_config": {
+  "risk_usd": 650,
+  "contracts": "26 MNQ",
+  "cushion": "12R=$7,800",
+  "payout": "immediate, 50%, min_take $500",
+  "account": "Topstep 150K XFA snapshot: MLL -4500 EOD-trail lock $0; 5x$150 win days; caps $5k std/$10k promo(DLL $3k); split 100%->90% after $10k; replacement $150/5d"
+ },
+ "versions": {
+  "python": "3.12.13",
+  "numpy": "2.5.2",
+  "pandas": "3.0.5",
+  "sklearn": "1.9.0"
+ },
+ "hashes": {
+  "scripts/p14_common.py": "e991b45c20589f6434be0f0898675a4c246a1f16de4a880378118d929e02d830",
+  "scripts/build_p14_fire.py": "3392b7a7637b84dbedb4f4071154528f5e3a0785b39bedee7ecf2431c3feefe3",
+  "scripts/run_p14_model.py": "23007dc05b8e1c12f98c3640d98c63a033a0f34a359c047b252f1c99365395c3",
+  "scripts/run_p14_final.py": "49e984b528b3589caab5ae4fcd59f5694cac009f251b994e88e85c1e8e18d132",
+  "scripts/run_p15_build.py": "463be49d35fc7a1255d27dce597b70bea397edac6edd6454b6d52e7396f88b83",
+  "scripts/p12_engine.py": "071c534eb81187ccad217380f4eb6e67d5c2ae07a50355bfbe69e72046dcfccd",
+  "scripts/p16_ref_sim.py": "0abac66ede80b0f28b6e324f1715e13bbccd60ed3573b266157ba6c8b2fb1c4c",
+  "scripts/run_p16_grid.py": "3b11f5fee79d0d18ee014a8ff060f646bb1d278b5a7279b4ff2020ec50a0caaa",
+  "src/nqlevels/features/interactions.py": "46f6333c8d8bc5f61150926c631c1db6d4e443b3a108b132df40f82166a92cbf",
+  "src/nqlevels/features/zones.py": "d19a3ee8c6a1cc2041f0b88cf91f4ab9243b3920a034e4fd40f8b5084929c8b8",
+  "src/nqlevels/labels/sweep.py": "d86a46a4b1e88ff8fba45bd6fac36822ad51cab0c87a3aeb49b6cd33ee241701",
+  "src/nqlevels/labels/enrich.py": "81831fd5cb5bd7d34195d83966271d3767bad0e6c53a417fb68e6bded2a4806f",
+  "src/nqlevels/io/raw.py": "49e27eb0c042d57cba980135af7f1a1d5e0059a7d3442306aeb4f4dc638277da",
+  "src/nqlevels/build/daily.py": "e5ddbb9fb6889146de88f141c5699c58a6a36aaee30b739ac99ce1e893d86c43",
+  "tests/test_chronology.py": "c7f2b938707f64cd29e1e76d376566125db22564e04387fa10c2c2cf25e3aa0b",
+  "configs/paths.yaml": "ab6c843e8da6653ced6f555d0697638eaaaee89928c8d7c892dc1cc7cb56517d",
+  "configs/cme_calendar.yaml": "c1e20dcf17363bfac3b44416da91e87d846c9b93d496263b26332f13304fcec0",
+  "configs/research.yaml": "bb18c0da32d64ae362e34283c9aff784f5339a92b9cb94b45efefc8e9289afaa",
+  "/Volumes/T9/nq_levels/daily/p16_balanced_scores.parquet": "efa8471d4bd08298463715f5e257fd4622e00d10f390fc5e7b25fcf4a9293de4",
+  "outputs/p16_thresholds.json": "3fcebc1e494fa9f61dcb2d0364f05e811b5b36c2425f8be701ec1ba2f6839089",
+  "/Volumes/T9/nq_levels/daily/p16_balanced_canonical.parquet": "5e5edf163956692fdaf3edcdbd3a453523e8cfecb84561d6d89a1200487a576d",
+  "/Volumes/T9/nq_levels/daily/p16_streams_canonical.pkl": "6d485ef64c1b5bb8b8536943163826192e1e67d6fee3cbe29ec3c3fe2de0882a",
+  "/Volumes/T9/nq_levels/daily/p14_fire.parquet": "15417a61627b8b211f1c9f8d4188a198e98c42f35ae99e3887d82ff79b960c6b"
+ }
+}

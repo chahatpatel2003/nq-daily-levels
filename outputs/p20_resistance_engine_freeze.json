@@ -1,0 +1,42 @@
+{
+ "name": "NQ RESISTANCE ZONE ENGINE (frozen, standalone)",
+ "frozen_utc": "2026-08-16T00:49:26.073712+00:00",
+ "pivot_methodology": "Zigzag pivots on FRONT-month 1-minute bars, three reversal scales in parallel: threshold = {0.15, 0.35, 0.75} x ATR (ticks). A pivot HIGH exists when price reverses down from a running maximum by >= threshold; it is CONFIRMED at the first bar where that reversal completes (i_confirm). Pivots repaint-free: a zone may only exist from its confirmation bar onward.",
+ "zone_anchor": "pivot extreme price (roll-adjusted ticks), price_rf",
+ "zone_width": "half-width hw = clip(base/2, floor 4 ticks (=1.0 pt), cap 0.03*ATR14) where base = high-low range of the 10 minutes up to and including the pivot bar (BASE_MIN=10). Zone = [price_rf - hw, price_rf + hw]. Widths vary because pre-pivot base ranges and ATR vary; cap binds in high ATR, floor in tiny bases.",
+ "near_far_edges": "for resistance role (approach from below): near edge = price_rf - hw (lower), far edge = price_rf + hw (upper)",
+ "creation_activation": "created at pivot confirmation minute (form_min within form session); tradeable/displayable from confirmation onward; same-session bars before form_min are masked",
+ "lifecycle": "retired after MAX_AGE_SESSIONS=30 sessions since formation OR MAX_TAPS=6 lifetime taps; decisive acceptance beyond the far edge (engine cat-F, close-dwell ACCEPT_DWELL with no reclaim) marks the zone flipped/broken (state knowable 2h later per display convention)",
+ "tap_definition": "band contact on dense 1-second data; a NEW tap requires prior re-arm: 1s closes out of the band by max(8 ticks, half-width) hysteresis AND >= REARM_S=900 s separation from the previous tap; tap counter is per-zone lifetime, increments at each armed contact",
+ "invalidation": "age>30 sessions, taps>=6, or flip acceptance (above)",
+ "overlapping_zones": "no merge rule exists: zones from different scales/pivots coexist independently (nesting is informative); display layer ranks zones but geometry is never merged",
+ "contract_roll": "front month selected per session from PRIOR-session symbol volumes (causal, seeded); cross-roll continuity via per-chain additive tick adjustment (roll_adjust); zone prices live in adjusted space; bars remain raw per contract",
+ "session_day": "session = 22:00 UTC (prev day) -> 21:00 UTC, CME calendar; segments coded from a fixed UTC-8 minute-of-day convention (asia/london/premkt/ny-am/ny-pm)",
+ "atr_dependency": "ATR14 = mean of prior 14 sessions' RTH (13:30-20:00Z summer) ranges, shifted one session (never includes current session); used ONLY for zigzag thresholds and the width cap",
+ "data_dependencies": "1m OHLC (zigzag, ATR, width base); 1s OHLC (tap detection + re-arm hysteresis); per-session symbol volumes (roll); NO volume/delta/model dependencies for the zone geometry itself",
+ "constants": {
+  "SCALES_ATR": [
+   0.15,
+   0.35,
+   0.75
+  ],
+  "BASE_MIN": 10,
+  "HW_FLOOR_T": 4.0,
+  "HW_CAP_ATR": 0.03,
+  "REARM_S": 900,
+  "MAX_TAPS": 6,
+  "MAX_AGE_SESSIONS": 30,
+  "MATURITY_S": 7200
+ },
+ "code_hashes": {
+  "src/nqlevels/features/zones.py": "d19a3ee8c6a1cc2041f0b88cf91f4ab9243b3920a034e4fd40f8b5084929c8b8",
+  "src/nqlevels/features/interactions.py": "46f6333c8d8bc5f61150926c631c1db6d4e443b3a108b132df40f82166a92cbf",
+  "scripts/build_interactions.py": "08ce282a6cbf4f5203a9d5245f03cf3ee6c29bddbdfa15b298b2300236094515",
+  "scripts/build_l1.py": "29d13efae7cf6710b83c2cf241d584fa207d9f2ac750fb6307e8a4f6003c657b",
+  "scripts/build_l2.py": "db4f2ca505df8418728c5949dca89db787e08ba7e8493d56b079ccd7241e5ca4",
+  "src/nqlevels/build/daily.py": "e5ddbb9fb6889146de88f141c5699c58a6a36aaee30b739ac99ce1e893d86c43",
+  "configs/research.yaml": "bb18c0da32d64ae362e34283c9aff784f5339a92b9cb94b45efefc8e9289afaa",
+  "configs/cme_calendar.yaml": "c1e20dcf17363bfac3b44416da91e87d846c9b93d496263b26332f13304fcec0",
+  "configs/paths.yaml": "ab6c843e8da6653ced6f555d0697638eaaaee89928c8d7c892dc1cc7cb56517d"
+ }
+}

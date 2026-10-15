@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "n_pass": 7,
+  "n_total": 7,
+  "results": [
+    {
+      "name": "prefix invariance (no future in a causal column)",
+      "passed": true,
+      "detail": "2 column(s) stable across 3 truncations",
+      "n_checked": 62
+    },
+    {
+      "name": "no outcome columns among features",
+      "passed": true,
+      "detail": "42 columns clean",
+      "n_checked": 42
+    },
+    {
+      "name": "candidate zones identical from a truncated tape",
+      "passed": true,
+      "detail": "732 zones over 4 sessions, 0 differences",
+      "n_checked": 732
+    },
+    {
+      "name": "decision-cut containment",
+      "passed": true,
+      "detail": "cut 2023-06-30T13:25:00+00:00",
+      "n_checked": 1006804
+    },
+    {
+      "name": "fit set disjoint from eval set",
+      "passed": true,
+      "detail": "871 fit / 369 eval sessions",
+      "n_checked": 1240
+    },
+    {
+      "name": "fit set disjoint from eval set",
+      "passed": true,
+      "detail": "1240 fit / 110 eval sessions",
+      "n_checked": 1350
+    },
+    {
+      "name": "roll decided from strictly prior session",
+      "passed": true,
+      "detail": "23 selections checked",
+      "n_checked": 23
+    }
+  ],
+  "per_session": [
+    {
+      "session": "2023-06-27",
+      "n_full": 185,
+      "n_trunc": 185,
+      "moved": 0,
+      "shape_ok": true
+    },
+    {
+      "session": "2023-06-28",
+      "n_full": 188,
+      "n_trunc": 188,
+      "moved": 0,
+      "shape_ok": true
+    },
+    {
+      "session": "2023-06-29",
+      "n_full": 179,
+      "n_trunc": 179,
+      "moved": 0,
+      "shape_ok": true
+    },
+    {
+      "session": "2023-06-30",
+      "n_full": 180,
+      "n_trunc": 180,
+      "moved": 0,
+      "shape_ok": true
+    }
+  ],
+  "split_sizes": {
+    "train": 871,
+    "validation": 369,
+    "holdout": 110,
+    "embargo": 20
+  }
+}

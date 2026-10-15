@@ -1,0 +1,33 @@
+{
+  "n_sessions": 100,
+  "features": {
+    "bk_secs": {
+      "auc_touch": 0.5618105848299184,
+      "auc_clean": 0.4845432911888876
+    },
+    "bk_twsize": {
+      "auc_touch": 0.5681109925385743,
+      "auc_clean": 0.47681709890147
+    },
+    "bk_adds": {
+      "auc_touch": 0.5647623672861742,
+      "auc_clean": 0.48154249651055747
+    },
+    "bk_cancels": {
+      "auc_touch": 0.5636002584961327,
+      "auc_clean": 0.48271394921573035
+    },
+    "bk_tradevol": {
+      "auc_touch": 0.5652708372914297,
+      "auc_clean": 0.4816194261293777
+    },
+    "bk_replenish": {
+      "auc_touch": 0.5629410531221432,
+      "auc_clean": 0.483347117945256
+    },
+    "bk_absorb": {
+      "auc_touch": 0.5704872687625112,
+      "auc_clean": 0.45297792601116826
+    }
+  }
+}
